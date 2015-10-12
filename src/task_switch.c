@@ -3,20 +3,22 @@
 
 struct key_t {
   u32 prev_pid;
-  u64 curr_pid;
+  u32 curr_pid;
 };
 // map_type, key_type, leaf_type, table_name, num_entry
 BPF_TABLE("hash", struct key_t, u64, stats, 1024);
-
 int count_sched(struct pt_regs *ctx, struct task_struct *prev) {
   struct key_t key = {};
   u64 zero = 0, *val;
+  int n = 0;
 
-  key.curr_pid = bpf_get_smp_processor_id();
-  key.prev_pid = 0;
+  key.curr_pid = bpf_get_current_pid_tgid();
+  key.prev_pid = prev->pid;
 
+  bpf_probe_read(&n, sizeof(int),(void*)prev->nvcsw); 
+  bpf_trace_printk("nvcsw : %d\n", n ); 
+ 
   val = stats.lookup_or_init(&key, &zero);
   (*val)++;
   return 0;
-}
-
+}	
