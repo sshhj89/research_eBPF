@@ -1,0 +1,19 @@
+ ==== TASK =====
+ task.create ->do_fork() : count
+ task.exit -> do_fork() : count
+ task.switch -> finish_task_switch() : count
+ 
+ ==== MEMORY ====
+ memory.kmalloc -> __kmalloc (if you want to check exact size of free size, store return value and calculate free size) : count, size
+ memory.kfree -> __kfree : count, size
+ memory.page_alloc -> __alloc_pages_nodemask() (order is exponentioal for page allocation, chech "CONFIG_NUMA")
+ memory.page_Free -> order == 0  free_hot_cold_page : count, size
+                     order > 0 __free_pages_ok
+ memory.reclaim (memory re-distribution, consider direct and background ) -> direct : try_to_free_pages : count, size
+                                                                          balance_pgdat -> ground reclaim
+ ==== fs ====
+  fs.page_cache_access or miss (consider read ahead) -> do_generic_file_read (use perf_reader_callback) 
+                                              (check __do_page_cache_readahead, page_cache_get_page, page_cache_access)
+                                          page_cache_sync_readahead -> page_cache_miss
+  fs.disk write back (consider background write back and direct write back) -> write_Cache_pages, wb_start_background_writeback, 
+                                                                               wirteback_single_inode
