@@ -1,0 +1,6 @@
+
+1. size(task.create) -> notification!!
+
+2. count(task.switch) > 100 -> notification!!
+
+3. count(memory.reclaim) > 100 && count(memory.page_alloc) > 10 -> notification!!
